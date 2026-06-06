@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUrlRequest;
 use App\Models\Url;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
@@ -39,33 +38,39 @@ class UrlController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUrlRequest $request): JsonResponse
     {
-        $url = $request->validated('url');
+        $data = $request->validated();
 
-        $link = Url::query()->where('url', $url)->first();
+        $url = $data['url'];
+
+        $link = Url::query()
+            ->where('url', $url)
+            ->first();
 
         if (!$link) {
             $link = Url::query()->create([
                 'url' => $url,
                 'code' => $this->generateUniqueCode(),
-                'clicks' => 0
+                'clicks' => 0,
             ]);
         }
 
         return response()->json([
             'code' => $link->code,
-            'short_url' => url($link->code)
+            'short_url' => url($link->code),
         ]);
     }
 
     public function redirect(string $code): RedirectResponse|JsonResponse
     {
-        $link = Url::query()->where('code', $code)->first();
+        $link = Url::query()
+            ->where('code', $code)
+            ->first();
 
         if (!$link) {
             return response()->json([
-                'message' => 'Ссылка не найдена'
+                'message' => 'Link not found',
             ], 404);
         }
 
@@ -76,11 +81,13 @@ class UrlController extends Controller
 
     public function stats(string $code): JsonResponse
     {
-        $link = Url::query()->where('code', $code)->first();
+        $link = Url::query()
+            ->where('code', $code)
+            ->first();
 
         if (!$link) {
             return response()->json([
-                'message' => 'Ссылка не найдена'
+                'message' => 'Link not found',
             ], 404);
         }
 
@@ -88,7 +95,7 @@ class UrlController extends Controller
             'url' => $link->url,
             'code' => $link->code,
             'clicks' => $link->clicks,
-            'created_at' => $link->created_at->toISOString()
+            'created_at' => $link->created_at->toISOString(),
         ]);
     }
 

@@ -16,5 +16,5 @@ class Url extends Model
         'clicks' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
-    ]
+    ];
 }
